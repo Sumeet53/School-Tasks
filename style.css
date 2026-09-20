@@ -702,3 +702,7 @@ body {
   margin: 0 auto 10px auto;
   padding: 0 12px;
 }
+/* Make overdue/due-today badges visually distinct */
+.days-badge-urgent {
+  font-weight: 800;
+}
