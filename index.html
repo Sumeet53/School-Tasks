@@ -32,24 +32,30 @@
       <div id="student-dropdown-list" hidden></div>
     </div>
 
-    <!-- Stat Cards -->
+        <!-- Stat Cards -->
     <div id="stat-cards">
       <div class="stat-card stat-danger">
-        <span class="stat-icon">🔴</span>
-        <span class="stat-number" id="stat-due-today">0</span>
+        <div class="stat-top">
+          <span class="stat-icon">❗</span>
+          <span class="stat-number" id="stat-due-today">0</span>
+        </div>
         <span class="stat-label">Due Today</span>
       </div>
-        <div class="stat-card stat-warning">
-        <span class="stat-icon calendar-icon">
-          <span class="calendar-icon-top"></span>
-          <span class="calendar-icon-num">25</span>
-        </span>
-        <span class="stat-number" id="stat-this-week">0</span>
+      <div class="stat-card stat-warning">
+        <div class="stat-top">
+          <span class="stat-icon calendar-icon">
+            <span class="calendar-icon-top"></span>
+            <span class="calendar-icon-num">25</span>
+          </span>
+          <span class="stat-number" id="stat-this-week">0</span>
+        </div>
         <span class="stat-label">This Week</span>
       </div>
       <div class="stat-card stat-success">
-        <span class="stat-icon">✅</span>
-        <span class="stat-number" id="stat-completed">0</span>
+        <div class="stat-top">
+          <span class="stat-icon">✅</span>
+          <span class="stat-number" id="stat-completed">0</span>
+        </div>
         <span class="stat-label">Completed</span>
       </div>
     </div>
