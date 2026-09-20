@@ -709,3 +709,23 @@ body {
 }
 .stat-overdue { background-color: #fde3e0; }
 .stat-overdue .stat-number { color: #c0392b; }
+
+/* ===== Disclaimer block styling ===== */
+.disclaimer-block {
+  border: 1px solid #f0c674;
+  background-color: #fffaf0;
+}
+
+.disclaimer-block h3 {
+  color: #a15c00;
+}
+
+.disclaimer-block p {
+  font-size: 0.82rem;
+  color: #5c4a1e;
+  margin-bottom: 8px;
+}
+
+.disclaimer-block p:last-child {
+  margin-bottom: 0;
+}
