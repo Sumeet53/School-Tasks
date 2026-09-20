@@ -32,7 +32,7 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   line-height: 1.45;
-  padding-bottom: 150px; /* room for floating buttons + bottom nav */
+  padding-bottom: 230px; /* room for floating buttons + bottom nav */
 }
 
 /* ===== Top App Bar ===== */
@@ -331,11 +331,26 @@ body {
     grid-template-areas:
       "subject task"
       "days action";
+    row-gap: 10px;
   }
   .col-subject { grid-area: subject; }
   .col-task    { grid-area: task; }
-  .col-days    { grid-area: days; }
-  .col-action  { grid-area: action; }
+
+  .col-days {
+    grid-area: days;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .col-action {
+    grid-area: action;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 14px;
+    font-size: 1.15rem;
+  }
 }
 
 /* ===== About Us View ===== */
