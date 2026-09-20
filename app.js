@@ -423,33 +423,41 @@ function priorityRowClass(t) {
 /* =========================================================
    10. BUILD ONE TASK ROW (4-column layout)
    ========================================================= */
+function daysBadgeClass(t) {
+  if (t.completed) return "days-badge-completed";
+  if (t.priority === "Urgent") return "days-badge-urgent";
+  if (t.priority === "Normal") return "days-badge-normal";
+  return "days-badge-low";
+}
+
 function buildTaskRow(t) {
   const left = daysLeft(t.dueDate);
-  const daysCell = t.completed
-    ? `<span class="days-pill pill-completed">✓</span>`
-    : `<span class="days-pill">${left}</span>`;
-  const subjectLabel = t.completed ? `${t.subject} ✅` : t.subject;
+  const daysLabel = t.completed
+    ? "✓ Done"
+    : `${left} day${Math.abs(left) === 1 ? "" : "s"} left`;
 
   return `
     <div class="task-row ${priorityRowClass(t)}">
 
-      <div class="col-subject">
-        <div class="subject-name">${subjectLabel}</div>
-        <div class="priority-ball ${priorityBallClass(t)}"></div>
+      <div class="row-line row-top">
+        <span class="priority-ball ${priorityBallClass(t)}"></span>
+        <span class="subject-name">${t.subject}</span>
       </div>
 
-      <div class="col-task">
-        <div class="task-text">${t.task}</div>
-        <div class="task-dates">Given: ${formatDate(t.givenDate)} &nbsp;|&nbsp; Due: ${formatDate(t.dueDate)}</div>
-        <div class="task-meta">${t.who} • ${t.taskType}</div>
+      <div class="row-line task-text">${t.task}</div>
+
+      <div class="row-line dates-line">
+        <span class="dates-text">Given: ${formatDate(t.givenDate)} &nbsp;|&nbsp; Due: ${formatDate(t.dueDate)}</span>
+        <span class="days-badge ${daysBadgeClass(t)}">${daysLabel}</span>
       </div>
 
-      <div class="col-days">
-        ${daysCell}
-      </div>
+      <div class="row-line meta-line">${t.who} • ${t.taskType}</div>
 
-      <div class="col-action">
-        <input type="checkbox" class="done-checkbox" data-id="${t.id}" ${t.completed ? "checked" : ""} title="Mark done" />
+      <div class="row-line actions-line">
+        <label class="done-check-wrap">
+          <input type="checkbox" class="done-checkbox" data-id="${t.id}" ${t.completed ? "checked" : ""} />
+          <span>Mark Done</span>
+        </label>
         <span class="action-icon" data-action="edit" data-id="${t.id}" title="Edit">✏️</span>
         <span class="action-icon" data-action="delete" data-id="${t.id}" title="Delete">🗑️</span>
       </div>
