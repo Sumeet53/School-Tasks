@@ -430,11 +430,16 @@ function daysBadgeClass(t) {
   return "days-badge-low";
 }
 
-function buildTaskRow(t) {
+function buildDaysLabel(t) {
   const left = daysLeft(t.dueDate);
-  const daysLabel = t.completed
-    ? "✓ Done"
-    : `${left} day${Math.abs(left) === 1 ? "" : "s"} left`;
+  if (t.completed) return "✓ Done";
+  if (left < 0) return `${Math.abs(left)} day${Math.abs(left) === 1 ? "" : "s"} overdue`;
+  if (left === 0) return "Due Today";
+  return `${left} day${left === 1 ? "" : "s"} left`;
+}
+
+function buildTaskRow(t) {
+  const daysLabel = buildDaysLabel(t);
 
   return `
     <div class="task-row ${priorityRowClass(t)}">
@@ -542,8 +547,8 @@ function getFilteredTasks() {
   const studentTasks = getStudentTasks();
   if (currentFilter === "urgent") return studentTasks.filter(t => !t.completed && t.priority === "Urgent");
   if (currentFilter === "today") return studentTasks.filter(t => !t.completed && isToday(t.dueDate));
-  if (currentFilter === "parent") return studentTasks.filter(t => t.who === "Parent");
-  if (currentFilter === "student") return studentTasks.filter(t => t.who === "Student");
+  if (currentFilter === "parent") return studentTasks.filter(t => t.who === "Parent" || t.who === "Parent + Student");
+  if (currentFilter === "student") return studentTasks.filter(t => t.who === "Student" || t.who === "Parent + Student");
   return studentTasks;
 }
 
