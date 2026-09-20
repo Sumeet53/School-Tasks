@@ -214,7 +214,7 @@ body {
 #task-table-wrapper {
   max-width: 900px;
   margin: 0 auto;
-  padding: 0 12px 170px 12px;
+  padding: 0 12px;
 }
 
 .task-row {
