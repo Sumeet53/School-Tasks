@@ -143,7 +143,7 @@ body {
   flex: 1;
   background-color: #ffffff;
   border-radius: 10px;
-  padding: 14px 8px;
+  padding: 10px 6px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -151,6 +151,17 @@ body {
   gap: 2px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
+
+.stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.stat-icon { font-size: 1rem; }
+.stat-number { font-size: 1.3rem; font-weight: 800; }
+.stat-label { font-size: 0.68rem; color: var(--color-text-muted); font-weight: 600; margin-top: 2px; }
 
 .stat-icon { font-size: 1.2rem; }
 .stat-number { font-size: 1.6rem; font-weight: 800; }
@@ -324,7 +335,21 @@ body {
 
 /* ===== Mobile: stack columns so nothing scrolls sideways ===== */
 @media (max-width: 480px) {
-  #task-table-header { display: none; }
+  #task-table-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "subject task"
+      "days action";
+    gap: 6px;
+    position: sticky;
+    top: 64px;
+    z-index: 40;
+  }
+  .th-subject { grid-area: subject; text-align: left; }
+  .th-task    { grid-area: task; text-align: left; }
+  .th-days    { grid-area: days; text-align: left; }
+  .th-action  { grid-area: action; text-align: right; }
 
   .task-row {
     grid-template-columns: 1fr 1fr;
