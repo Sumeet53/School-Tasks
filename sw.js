@@ -7,7 +7,6 @@
 const CACHE_NAME = "schooltasks-cache-v4";
 
 const FILES_TO_CACHE = [
-  "./",
   "./index.html",
   "./style.css",
   "./app.js",
@@ -16,11 +15,19 @@ const FILES_TO_CACHE = [
   "./icon-512.png"
 ];
 
-// Install: cache all core files
+// Install: cache each core file. Using allSettled instead of addAll
+// so that if one file fails, the others still get cached and the
+// service worker still activates successfully.
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(FILES_TO_CACHE);
+      return Promise.allSettled(
+        FILES_TO_CACHE.map((file) =>
+          cache.add(file).catch((err) => {
+            console.warn("Failed to cache:", file, err);
+          })
+        )
+      );
     })
   );
   self.skipWaiting();
@@ -56,7 +63,6 @@ self.addEventListener("fetch", (event) => {
           });
         })
         .catch(() => {
-          // If offline and not cached, just fail gracefully
           return caches.match("./index.html");
         });
     })
