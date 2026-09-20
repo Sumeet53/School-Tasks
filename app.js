@@ -598,10 +598,12 @@ function renderCompletedTasks() {
 
 function renderStatCards() {
   const studentTasks = getStudentTasks();
+  const overdue = studentTasks.filter(t => !t.completed && daysLeft(t.dueDate) < 0).length;
   const dueToday = studentTasks.filter(t => !t.completed && daysLeft(t.dueDate) === 0).length;
   const thisWeek = studentTasks.filter(t => !t.completed && daysLeft(t.dueDate) >= 0 && daysLeft(t.dueDate) <= 7).length;
   const completedCount = studentTasks.filter(t => t.completed).length;
 
+  document.getElementById("stat-overdue").textContent = overdue;
   document.getElementById("stat-due-today").textContent = dueToday;
   document.getElementById("stat-this-week").textContent = thisWeek;
   document.getElementById("stat-completed").textContent = completedCount;
