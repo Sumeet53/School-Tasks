@@ -177,13 +177,19 @@ body {
 /* ===== Filter Pills ===== */
 #filter-bar {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
   max-width: 900px;
   margin: 0 auto 12px auto;
   padding: 0 12px;
+}
+
+.filter-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 
 .filter-pill {
