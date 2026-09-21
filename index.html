@@ -10,278 +10,286 @@
 </head>
 <body>
 
-  <!-- ===== Top App Bar ===== -->
-  <header id="app-header">
-    <div id="app-brand">
-      <span id="app-logo">📚</span>
-      <h1><span class="brand-dark">School</span><span class="brand-blue">Tasks</span></h1>
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="login-logo">📚</div>
+      <h1 class="login-title"><span class="brand-dark">School</span><span class="brand-blue">Tasks</span></h1>
+      <p class="login-subtitle" id="login-mode-subtitle">Log in to your family account</p>
+
+      <form id="login-form">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" required />
+
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" required minlength="6" />
+
+        <p id="login-error" class="login-error" hidden></p>
+
+        <button type="submit" id="login-submit-btn">Log In</button>
+      </form>
+
+      <button id="login-toggle-mode" class="login-toggle-link">New family? Create an account</button>
     </div>
-    <button id="open-settings" class="header-icon-btn" title="Settings">⚙️</button>
-  </header>
+  </div>
 
-  <!-- ===== HOME VIEW ===== -->
-  <div id="home-view-wrapper">
+  <!-- ===== MAIN APP (hidden until logged in) ===== -->
+  <div id="app-root" hidden>
 
-    <!-- Student Switcher -->
-    <div id="student-switcher">
-      <button id="student-switcher-btn">
-        <span id="student-avatar">🧒</span>
-        <span id="student-switcher-label">Loading...</span>
-        <span class="dropdown-caret">▾</span>
-      </button>
-      <div id="student-dropdown-list" hidden></div>
-    </div>
+    <header id="app-header">
+      <div id="app-brand">
+        <span id="app-logo">📚</span>
+        <h1><span class="brand-dark">School</span><span class="brand-blue">Tasks</span></h1>
+      </div>
+      <button id="open-settings" class="header-icon-btn" title="Settings">⚙️</button>
+    </header>
 
-          <!-- Stat Cards -->
-    <div id="stat-cards">
-      <div class="stat-card stat-overdue">
-        <div class="stat-top">
-          <span class="stat-icon">⏰</span>
-          <span class="stat-number" id="stat-overdue">0</span>
-        </div>
-        <span class="stat-label">Overdue</span>
-      </div>
-      <div class="stat-card stat-danger">
-        <div class="stat-top">
-          <span class="stat-icon">❗</span>
-          <span class="stat-number" id="stat-due-today">0</span>
-        </div>
-        <span class="stat-label">Due Today</span>
-      </div>
-      <div class="stat-card stat-warning">
-        <div class="stat-top">
-          <span class="stat-icon calendar-icon">
-            <span class="calendar-icon-top"></span>
-            <span class="calendar-icon-num">25</span>
-          </span>
-          <span class="stat-number" id="stat-this-week">0</span>
-        </div>
-        <span class="stat-label">This Week</span>
-      </div>
-      <div class="stat-card stat-success">
-        <div class="stat-top">
-          <span class="stat-icon">✅</span>
-          <span class="stat-number" id="stat-completed">0</span>
-        </div>
-        <span class="stat-label">Completed</span>
-      </div>
-    </div>
+    <div id="home-view-wrapper">
 
-    <!-- Filter Pills -->
+      <div id="student-switcher">
+        <button id="student-switcher-btn">
+          <span id="student-avatar">🧒</span>
+          <span id="student-switcher-label">Loading...</span>
+          <span class="dropdown-caret">▾</span>
+        </button>
+        <div id="student-dropdown-list" hidden></div>
+      </div>
+
+      <div id="stat-cards">
+        <div class="stat-card stat-overdue">
+          <div class="stat-top">
+            <span class="stat-icon">⏰</span>
+            <span class="stat-number" id="stat-overdue">0</span>
+          </div>
+          <span class="stat-label">Overdue</span>
+        </div>
+        <div class="stat-card stat-danger">
+          <div class="stat-top">
+            <span class="stat-icon">❗</span>
+            <span class="stat-number" id="stat-due-today">0</span>
+          </div>
+          <span class="stat-label">Due Today</span>
+        </div>
+        <div class="stat-card stat-warning">
+          <div class="stat-top">
+            <span class="stat-icon calendar-icon">
+              <span class="calendar-icon-top"></span>
+              <span class="calendar-icon-num">25</span>
+            </span>
+            <span class="stat-number" id="stat-this-week">0</span>
+          </div>
+          <span class="stat-label">This Week</span>
+        </div>
+        <div class="stat-card stat-success">
+          <div class="stat-top">
+            <span class="stat-icon">✅</span>
+            <span class="stat-number" id="stat-completed">0</span>
+          </div>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+
       <nav id="filter-bar">
-      <div class="filter-row">
-        <button id="filter-all" class="filter-pill">All</button>
-        <button id="filter-urgent" class="filter-pill">❗ Urgent</button>
-        <button id="filter-today" class="filter-pill">Today</button>
-      </div>
-      <div class="filter-row">
-        <button id="filter-parent" class="filter-pill">👤 Parent</button>
-        <button id="filter-student" class="filter-pill">🎓 Student</button>
-      </div>
-    </nav>
+        <div class="filter-row">
+          <button id="filter-all" class="filter-pill">All</button>
+          <button id="filter-urgent" class="filter-pill">❗ Urgent</button>
+          <button id="filter-today" class="filter-pill">Today</button>
+        </div>
+        <div class="filter-row">
+          <button id="filter-parent" class="filter-pill">👤 Parent</button>
+          <button id="filter-student" class="filter-pill">🎓 Student</button>
+        </div>
+      </nav>
 
-  <p id="scroll-hint">👇 Scroll down to see more tasks</p>
+      <p id="scroll-hint">👇 Scroll down to see more tasks</p>
 
-    <!-- Task List -->
-    <main id="task-table-wrapper">
-      <div id="task-table-body">
-        <!-- rows inserted by JS -->
+      <main id="task-table-wrapper">
+        <div id="task-table-body">
+          <!-- rows inserted by JS -->
+        </div>
+      </main>
+
+      <section id="completed-section">
+        <button id="completed-toggle" class="completed-toggle-btn">
+          <span>✅ Completed Tasks (<span id="completed-count-toggle">0</span>)</span>
+          <span id="completed-arrow">▼</span>
+        </button>
+        <div id="completed-table-body" hidden></div>
+      </section>
+    </div>
+
+    <section id="about-view" hidden>
+      <div class="about-block">
+        <h2>About Opal Luna Labs</h2>
+        <p>
+          Opal Luna Labs is a young company, just getting started. SchoolTasks is our
+          first app — built to solve a simple, everyday problem: keeping track of everything
+          teachers share in WhatsApp groups, so parents and students don't miss a due date.
+        </p>
+        <p>
+          We're still early, learning, and improving this app step by step based on how
+          real families actually use it. Thank you for being here at the start.
+        </p>
       </div>
-    </main>
 
-    <!-- Completed Tasks (collapsed by default) -->
-    <section id="completed-section">
-      <button id="completed-toggle" class="completed-toggle-btn">
-        <span>✅ Completed Tasks (<span id="completed-count-toggle">0</span>)</span>
-        <span id="completed-arrow">▼</span>
-      </button>
-      <div id="completed-table-body" hidden>
-        <!-- completed rows inserted by JS -->
+      <div class="about-block">
+        <h3>What's Next</h3>
+        <p>
+          We don't have other apps or products to share yet — but we're building toward
+          more. As Opal Luna Labs grows, this space will feature our future apps and
+          ventures. For now, our full focus is on making SchoolTasks genuinely useful
+          for your family.
+        </p>
+      </div>
+
+      <div class="about-block disclaimer-block">
+        <h3>⚠️ Disclaimer</h3>
+        <p>
+          SchoolTasks is provided "as is," on a best-effort basis, with no warranty of
+          any kind, express or implied. Task details, dates, and priorities shown in
+          this app are based on information entered or pasted by the user (including
+          text copied from WhatsApp messages) and are <strong>not verified against any
+          official school record</strong>. This app is a personal organizational aid
+          only, and is not affiliated with, endorsed by, or a substitute for
+          communication with your child's school or teachers.
+        </p>
+        <p>
+          Opal Luna Labs and the developer(s) of this app accept
+          <strong>no liability whatsoever</strong> — including but not limited to any
+          missed assignment, incorrect date, lost data, financial loss, academic
+          consequence, or any other direct, indirect, incidental, or consequential loss
+          or damage — arising from the use of, reliance on, or inability to use this
+          app. Users are solely responsible for independently verifying all task details,
+          deadlines, and school communications with their child's school.
+        </p>
+        <p>
+          By using this app, you agree to this disclaimer. If you do not agree, please
+          discontinue use of the app.
+        </p>
       </div>
     </section>
+
+    <footer id="app-footer">
+      <p>© 2026 Opal Luna Labs. All Rights Reserved.<br />
+      Powered &amp; Designed by Opal Luna Labs</p>
+    </footer>
+
+    <button id="open-paste-message" class="fab-button fab-secondary" title="Paste WhatsApp Message">📋</button>
+    <button id="open-add-task" class="add-task-pill">+ Add Task</button>
+
+    <nav id="bottom-nav">
+      <button class="nav-btn active" data-view="home">
+        <span class="nav-icon">🏠</span><span>Home</span>
+      </button>
+      <button class="nav-btn" id="nav-whatsapp">
+        <span class="nav-icon">💬</span><span>WhatsApp</span>
+      </button>
+      <button class="nav-btn" id="nav-add-student">
+        <span class="nav-icon">👤➕</span><span>Add Student</span>
+      </button>
+      <button class="nav-btn" id="nav-settings">
+        <span class="nav-icon">⚙️</span><span>Settings</span>
+      </button>
+      <button class="nav-btn" data-view="about">
+        <span class="nav-icon">ℹ️</span><span>About Us</span>
+      </button>
+    </nav>
+
+    <div id="settings-modal" class="modal-overlay" hidden>
+      <div class="modal-content">
+        <button id="close-settings" class="modal-close" title="Close">&times;</button>
+        <h2>Settings</h2>
+        <label class="toggle-row">
+          <span>Automatically add tasks parsed from pasted messages<br />
+          <small>(If off, you'll review &amp; confirm each task first)</small></span>
+          <input type="checkbox" id="auto-add-toggle" />
+        </label>
+        <button id="settings-ok-btn" class="settings-ok-btn">✅ OK</button>
+        <button id="logout-btn" class="logout-btn">🚪 Log Out</button>
+      </div>
+    </div>
+
+    <div id="add-student-modal" class="modal-overlay" hidden>
+      <div class="modal-content">
+        <button id="close-add-student" class="modal-close" title="Close">&times;</button>
+        <h2>Add Student</h2>
+        <form id="add-student-form">
+          <label for="new-student-name">Student Name</label>
+          <input type="text" id="new-student-name" required />
+
+          <label for="new-student-class">Class</label>
+          <input type="text" id="new-student-class" placeholder="e.g. Class 5" required />
+
+          <label for="new-student-gender">Gender</label>
+          <select id="new-student-gender" required>
+            <option value="Boy">Boy</option>
+            <option value="Girl">Girl</option>
+          </select>
+
+          <button type="submit">Add Student</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="paste-message-modal" class="modal-overlay" hidden>
+      <div class="modal-content">
+        <button id="close-paste-message" class="modal-close" title="Close">&times;</button>
+        <h2>Paste WhatsApp Message</h2>
+        <p class="modal-hint">Copy the teacher's message from your WhatsApp group and paste it below.</p>
+        <textarea id="paste-message-text" rows="6" placeholder="Paste teacher's message here..."></textarea>
+        <button id="parse-message-btn" type="button">Parse Message</button>
+      </div>
+    </div>
+
+    <div id="add-task-modal" class="modal-overlay" hidden>
+      <div class="modal-content">
+        <button id="close-add-task" class="modal-close" title="Close">&times;</button>
+        <h2 id="modal-title">Add Task</h2>
+        <form id="add-task-form">
+          <label for="subject-select">Subject</label>
+          <select id="subject-select"></select>
+
+          <label for="task-text">Task</label>
+          <input type="text" id="task-text" required />
+
+          <label for="given-date">Given Date</label>
+          <input type="date" id="given-date" required />
+
+          <label for="due-date">Due Date</label>
+          <input type="date" id="due-date" required />
+
+          <label for="who-select">Who has to do it?</label>
+          <select id="who-select">
+            <option value="Student">Student</option>
+            <option value="Parent">Parent</option>
+            <option value="Parent + Student">Parent + Student</option>
+          </select>
+
+          <label for="task-type">Task Type</label>
+          <select id="task-type">
+            <option value="Homework">Homework</option>
+            <option value="Project">Project</option>
+            <option value="Bring something">Bring something</option>
+            <option value="Exam / Test">Exam / Test</option>
+            <option value="Revision">Revision</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <label for="priority-select">Priority</label>
+          <select id="priority-select">
+            <option value="Urgent">Urgent</option>
+            <option value="Normal" selected>Normal</option>
+            <option value="Low">Low</option>
+          </select>
+
+          <button type="submit" id="submit-task-btn">Add Task</button>
+        </form>
+      </div>
+    </div>
+
   </div>
 
-    <!-- ===== ABOUT US VIEW ===== -->
-  <section id="about-view" hidden>
-
-    <div class="about-block">
-      <h2>About Opal Luna Labs</h2>
-      <p>
-        Opal Luna Labs is a young company, just getting started. SchoolTasks is our
-        first app — built to solve a simple, everyday problem: keeping track of everything
-        teachers share in WhatsApp groups, so parents and students don't miss a due date.
-      </p>
-      <p>
-        We're still early, learning, and improving this app step by step based on how
-        real families actually use it. Thank you for being here at the start.
-      </p>
-    </div>
-
-    <div class="about-block">
-      <h3>What's Next</h3>
-      <p>
-        We don't have other apps or products to share yet — but we're building toward
-        more. As Opal Luna Labs grows, this space will feature our future apps and
-        ventures. For now, our full focus is on making SchoolTasks genuinely useful
-        for your family.
-      </p>
-    </div>
-
-    <div class="about-block disclaimer-block">
-      <h3>⚠️ Disclaimer</h3>
-      <p>
-        SchoolTasks is provided "as is," on a best-effort basis, with no warranty of
-        any kind, express or implied. Task details, dates, and priorities shown in
-        this app are based on information entered or pasted by the user (including
-        text copied from WhatsApp messages) and are <strong>not verified against any
-        official school record</strong>. This app is a personal organizational aid
-        only, and is not affiliated with, endorsed by, or a substitute for
-        communication with your child's school or teachers.
-      </p>
-      <p>
-        Opal Luna Labs and the developer(s) of this app accept
-        <strong>no liability whatsoever</strong> — including but not limited to any
-        missed assignment, incorrect date, lost data, financial loss, academic
-        consequence, or any other direct, indirect, incidental, or consequential loss
-        or damage — arising from the use of, reliance on, or inability to use this
-        app. Users are solely responsible for independently verifying all task details,
-        deadlines, and school communications with their child's school.
-      </p>
-      <p>
-        By using this app, you agree to this disclaimer. If you do not agree, please
-        discontinue use of the app.
-      </p>
-    </div>
-
-  </section>
-
-  <!-- ===== Footer ===== -->
-  <footer id="app-footer">
-    <p>© 2026 Opal Luna Labs. All Rights Reserved.<br />
-    Powered &amp; Designed by Opal Luna Labs</p>
-  </footer>
-
-  <!-- Floating Paste Message Button -->
-  <button id="open-paste-message" class="fab-button fab-secondary" title="Paste WhatsApp Message">📋</button>
-
-  <!-- Add Task Pill Button -->
-  <button id="open-add-task" class="add-task-pill">+ Add Task</button>
-
-  <!-- ===== Bottom Navigation ===== -->
-  <nav id="bottom-nav">
-    <button class="nav-btn active" data-view="home">
-      <span class="nav-icon">🏠</span><span>Home</span>
-    </button>
-    <button class="nav-btn" id="nav-whatsapp">
-      <span class="nav-icon">💬</span><span>WhatsApp</span>
-    </button>
-    <button class="nav-btn" id="nav-add-student">
-      <span class="nav-icon">👤➕</span><span>Add Student</span>
-    </button>
-    <button class="nav-btn" id="nav-settings">
-      <span class="nav-icon">⚙️</span><span>Settings</span>
-    </button>
-    <button class="nav-btn" data-view="about">
-      <span class="nav-icon">ℹ️</span><span>About Us</span>
-    </button>
-  </nav>
-
-    <!-- ===== Settings Modal ===== -->
-  <div id="settings-modal" class="modal-overlay" hidden>
-    <div class="modal-content">
-      <button id="close-settings" class="modal-close" title="Close">&times;</button>
-      <h2>Settings</h2>
-      <label class="toggle-row">
-        <span>Automatically add tasks parsed from pasted messages<br />
-        <small>(If off, you'll review &amp; confirm each task first)</small></span>
-        <input type="checkbox" id="auto-add-toggle" />
-      </label>
-      <button id="settings-ok-btn" class="settings-ok-btn">✅ OK</button>
-    </div>
-  </div>
-
-    <!-- ===== Add Student Modal ===== -->
-  <div id="add-student-modal" class="modal-overlay" hidden>
-    <div class="modal-content">
-      <button id="close-add-student" class="modal-close" title="Close">&times;</button>
-      <h2>Add Student</h2>
-      <form id="add-student-form">
-        <label for="new-student-name">Student Name</label>
-        <input type="text" id="new-student-name" required />
-
-        <label for="new-student-class">Class</label>
-        <input type="text" id="new-student-class" placeholder="e.g. Class 5" required />
-
-        <label for="new-student-gender">Gender</label>
-        <select id="new-student-gender" required>
-          <option value="Boy">Boy</option>
-          <option value="Girl">Girl</option>
-        </select>
-
-        <button type="submit">Add Student</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ===== Paste Message Modal ===== -->
-  <div id="paste-message-modal" class="modal-overlay" hidden>
-    <div class="modal-content">
-      <button id="close-paste-message" class="modal-close" title="Close">&times;</button>
-      <h2>Paste WhatsApp Message</h2>
-      <p class="modal-hint">Copy the teacher's message from your WhatsApp group and paste it below.</p>
-      <textarea id="paste-message-text" rows="6" placeholder="Paste teacher's message here..."></textarea>
-      <button id="parse-message-btn" type="button">Capture Message</button>
-    </div>
-  </div>
-
-  <!-- ===== Add / Edit / Review Task Modal ===== -->
-  <div id="add-task-modal" class="modal-overlay" hidden>
-    <div class="modal-content">
-      <button id="close-add-task" class="modal-close" title="Close">&times;</button>
-      <h2 id="modal-title">Add Task</h2>
-      <form id="add-task-form">
-        <label for="subject-select">Subject</label>
-        <select id="subject-select"></select>
-
-        <label for="task-text">Task</label>
-        <input type="text" id="task-text" required />
-
-        <label for="given-date">Given Date</label>
-        <input type="date" id="given-date" required />
-
-        <label for="due-date">Due Date</label>
-        <input type="date" id="due-date" required />
-
-        <label for="who-select">Who has to do it?</label>
-        <select id="who-select">
-          <option value="Student">Student</option>
-          <option value="Parent">Parent</option>
-          <option value="Parent + Student">Parent + Student</option>
-        </select>
-
-        <label for="task-type">Task Type</label>
-        <select id="task-type">
-          <option value="Homework">Homework</option>
-          <option value="Project">Project</option>
-          <option value="Bring something">Bring something</option>
-          <option value="Exam / Test">Exam / Test</option>
-          <option value="Revision">Revision</option>
-          <option value="Other">Other</option>
-        </select>
-
-        <label for="priority-select">Priority</label>
-        <select id="priority-select">
-          <option value="Urgent">Urgent</option>
-          <option value="Normal" selected>Normal</option>
-          <option value="Low">Low</option>
-        </select>
-
-        <button type="submit" id="submit-task-btn">Add Task</button>
-      </form>
-    </div>
-  </div>
-
-    <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 
   <script>
     if ("serviceWorker" in navigator) {
@@ -299,7 +307,5 @@
       }
     }
   </script>
-</body>
-</html>
 </body>
 </html>
