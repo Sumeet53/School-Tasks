@@ -651,13 +651,3 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("filter-all").classList.add("active");
   renderAll();
 });
-/* =========================================================
-   REGISTER SERVICE WORKER (enables offline support)
-   ========================================================= */
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js")
-      .then(() => console.log("Service worker registered."))
-      .catch((err) => console.error("Service worker registration failed:", err));
-  });
-}
