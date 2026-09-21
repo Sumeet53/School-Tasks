@@ -826,3 +826,18 @@ body {
 }
 
 .logout-btn:hover { background-color: #fadbd8; }
+/* ===== Logo images (replacing 📚 emoji) ===== */
+.login-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  margin: 0 auto 6px auto;
+  display: block;
+}
+
+#app-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: block;
+}
