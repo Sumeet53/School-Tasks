@@ -1,10 +1,142 @@
 /* =========================================================
-   1. STUDENTS
+   0. FIREBASE SETUP
    ========================================================= */
-let students = [
-  { id: 1, name: "Soham", className: "Class 8", gender: "Boy" }
-];
-let currentStudentId = 1;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+  createUserWithEmailAndPassword, signOut
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import {
+  getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyADL-_-NBH55fb37CLUrllyZmKEsh8Bmno",
+  authDomain: "schooltasks-app.firebaseapp.com",
+  projectId: "schooltasks-app",
+  storageBucket: "schooltasks-app.firebasestorage.app",
+  messagingSenderId: "483992809144",
+  appId: "1:483992809144:web:b989a0b80f6be8de2a4e4d"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
+
+let currentUid = null;
+let unsubStudents = null;
+let unsubTasks = null;
+
+/* =========================================================
+   1. LOGIN SCREEN
+   ========================================================= */
+let loginMode = "login"; // "login" or "signup"
+
+function setupLoginScreen() {
+  const form = document.getElementById("login-form");
+  const toggleBtn = document.getElementById("login-toggle-mode");
+  const subtitle = document.getElementById("login-mode-subtitle");
+  const submitBtn = document.getElementById("login-submit-btn");
+  const errorEl = document.getElementById("login-error");
+
+  toggleBtn.addEventListener("click", () => {
+    loginMode = loginMode === "login" ? "signup" : "login";
+    if (loginMode === "signup") {
+      subtitle.textContent = "Create your family account";
+      submitBtn.textContent = "Create Account";
+      toggleBtn.textContent = "Already have an account? Log in";
+    } else {
+      subtitle.textContent = "Log in to your family account";
+      submitBtn.textContent = "Log In";
+      toggleBtn.textContent = "New family? Create an account";
+    }
+    errorEl.hidden = true;
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    errorEl.hidden = true;
+
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+
+    const action = loginMode === "signup"
+      ? createUserWithEmailAndPassword(auth, email, password)
+      : signInWithEmailAndPassword(auth, email, password);
+
+    action.catch((err) => {
+      errorEl.textContent = humanizeAuthError(err.code);
+      errorEl.hidden = false;
+    });
+  });
+}
+
+function humanizeAuthError(code) {
+  if (code === "auth/email-already-in-use") return "That email is already registered — try logging in instead.";
+  if (code === "auth/invalid-email") return "Please enter a valid email address.";
+  if (code === "auth/weak-password") return "Password should be at least 6 characters.";
+  if (code === "auth/invalid-credential" || code === "auth/wrong-password") return "Incorrect email or password.";
+  if (code === "auth/user-not-found") return "No account found with that email.";
+  return "Something went wrong. Please try again.";
+}
+
+function setupLogout() {
+  document.getElementById("logout-btn").addEventListener("click", () => {
+    if (confirm("Log out of SchoolTasks?")) {
+      signOut(auth);
+    }
+  });
+}
+
+/* =========================================================
+   2. AUTH STATE -> SHOW LOGIN OR APP
+   ========================================================= */
+onAuthStateChanged(auth, (user) => {
+  const loginScreen = document.getElementById("login-screen");
+  const appRoot = document.getElementById("app-root");
+
+  if (user) {
+    currentUid = user.uid;
+    loginScreen.hidden = true;
+    appRoot.hidden = false;
+    attachFirestoreListeners();
+  } else {
+    currentUid = null;
+    if (unsubStudents) unsubStudents();
+    if (unsubTasks) unsubTasks();
+    students = [];
+    tasks = [];
+    currentStudentId = null;
+    loginScreen.hidden = false;
+    appRoot.hidden = true;
+    document.getElementById("login-form").reset();
+  }
+});
+
+/* =========================================================
+   3. STUDENTS & TASKS (now backed by Firestore)
+   ========================================================= */
+let students = [];
+let tasks = [];
+let currentStudentId = null;
+
+function attachFirestoreListeners() {
+  const studentsRef = collection(db, "families", currentUid, "students");
+  unsubStudents = onSnapshot(studentsRef, (snapshot) => {
+    students = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!currentStudentId || !students.find(s => s.id === currentStudentId)) {
+      currentStudentId = students.length ? students[0].id : null;
+    }
+    renderStudentSwitcher();
+    renderAll();
+  });
+
+  const tasksRef = collection(db, "families", currentUid, "tasks");
+  unsubTasks = onSnapshot(tasksRef, (snapshot) => {
+    tasks = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderAll();
+  });
+}
 
 function getCurrentStudent() {
   return students.find(s => s.id === currentStudentId);
@@ -23,7 +155,7 @@ function renderStudentSwitcher() {
   document.getElementById("student-avatar").textContent =
     student ? genderAvatar(student.gender) : "🧒";
   document.getElementById("student-switcher-label").textContent =
-    student ? `${student.name} — ${student.className}` : "No student";
+    student ? `${student.name} — ${student.className}` : "Add a student";
 }
 
 function renderStudentDropdown() {
@@ -32,7 +164,7 @@ function renderStudentDropdown() {
     <div class="student-dropdown-item ${s.id === currentStudentId ? "active" : ""}" data-id="${s.id}">
       ${genderAvatar(s.gender)} ${s.name} — ${s.className}
     </div>
-  `).join("");
+  `).join("") || `<div class="student-dropdown-item">No students yet — tap "Add Student" below.</div>`;
 }
 
 function setupStudentSwitcher() {
@@ -46,8 +178,8 @@ function setupStudentSwitcher() {
 
   list.addEventListener("click", (e) => {
     const item = e.target.closest(".student-dropdown-item");
-    if (!item) return;
-    currentStudentId = Number(item.dataset.id);
+    if (!item || !item.dataset.id) return;
+    currentStudentId = item.dataset.id;
     list.hidden = true;
     renderStudentSwitcher();
     renderAll();
@@ -68,46 +200,24 @@ function setupAddStudentModal() {
     modal.hidden = false;
   });
 
-  document.getElementById("close-add-student").addEventListener("click", () => {
-    modal.hidden = true;
-  });
+  document.getElementById("close-add-student").addEventListener("click", () => modal.hidden = true);
+  modal.addEventListener("click", (e) => { if (e.target.id === "add-student-modal") modal.hidden = true; });
 
-  modal.addEventListener("click", (e) => {
-    if (e.target.id === "add-student-modal") modal.hidden = true;
-  });
-
-    document.getElementById("add-student-form").addEventListener("submit", (e) => {
+  document.getElementById("add-student-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = document.getElementById("new-student-name").value.trim();
     const className = document.getElementById("new-student-class").value.trim();
     const gender = document.getElementById("new-student-gender").value;
-    if (!name || !className) return;
+    if (!name || !className || !currentUid) return;
 
-    const newStudent = { id: Date.now(), name, className, gender };
-    students.push(newStudent);
-    currentStudentId = newStudent.id;
-
-    renderStudentSwitcher();
-    renderAll();
+    const docRef = await addDoc(collection(db, "families", currentUid, "students"), { name, className, gender });
+    currentStudentId = docRef.id;
     modal.hidden = true;
   });
 }
 
 /* =========================================================
-   2. SAMPLE TASK DATA (each task belongs to a studentId)
-   ========================================================= */
-let tasks = [
-  { id: 1, studentId: 1, subject: "Maths", task: "Ex 6.3 Q1-10", givenDate: "2026-09-10", dueDate: "2026-09-14", who: "Student", taskType: "Homework", priority: "Urgent", completed: false },
-  { id: 2, studentId: 1, subject: "Science", task: "Bring activity file", givenDate: "2026-09-10", dueDate: "2026-09-14", who: "Parent", taskType: "Bring something", priority: "Urgent", completed: false },
-  { id: 3, studentId: 1, subject: "English", task: "Complete worksheets", givenDate: "2026-09-11", dueDate: "2026-09-15", who: "Student", taskType: "Homework", priority: "Urgent", completed: false },
-  { id: 4, studentId: 1, subject: "Hindi", task: "Read chapter 5 and answer questions", givenDate: "2026-09-12", dueDate: "2026-09-16", who: "Student", taskType: "Homework", priority: "Normal", completed: false },
-  { id: 5, studentId: 1, subject: "EVS", task: "Project file (keep ready)", givenDate: "2026-09-13", dueDate: "2026-09-18", who: "Parent", taskType: "Project", priority: "Low", completed: false },
-  { id: 6, studentId: 1, subject: "Maths", task: "Revise formulas", givenDate: "2026-09-05", dueDate: "2026-09-10", who: "Student", taskType: "Revision", priority: "Normal", completed: true },
-  { id: 7, studentId: 1, subject: "Science", task: "Read chapter 3", givenDate: "2026-09-08", dueDate: "2026-09-12", who: "Student", taskType: "Homework", priority: "Normal", completed: true }
-];
-
-/* =========================================================
-   3. SETTINGS (Auto vs Manual add)
+   4. SETTINGS (Auto vs Manual add) + Logout
    ========================================================= */
 let autoAddEnabled = false;
 
@@ -125,7 +235,7 @@ function setupSettingsModal() {
 }
 
 /* =========================================================
-   4. SUBJECT SHORT-NAME LIST
+   5. SUBJECT SHORT-NAME LIST (local per device)
    ========================================================= */
 let subjectList = [
   "Maths", "EVS", "English", "Hindi", "Science", "SST",
@@ -158,7 +268,7 @@ function setupSubjectDropdown() {
 }
 
 /* =========================================================
-   5. ADD / EDIT / REVIEW TASK MODAL
+   6. ADD / EDIT / REVIEW TASK MODAL
    ========================================================= */
 let editingTaskId = null;
 
@@ -167,6 +277,10 @@ function todayISO() {
 }
 
 function openAddModal() {
+  if (!currentStudentId) {
+    alert("Please add a student first (tap 'Add Student' below).");
+    return;
+  }
   editingTaskId = null;
   document.getElementById("add-task-form").reset();
   document.getElementById("given-date").value = todayISO();
@@ -223,8 +337,9 @@ function setupAddTaskModal() {
 
 function setupAddTaskForm() {
   const form = document.getElementById("add-task-form");
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (!currentUid || !currentStudentId) return;
 
     const subject = document.getElementById("subject-select").value;
     const taskText = document.getElementById("task-text").value;
@@ -235,39 +350,34 @@ function setupAddTaskForm() {
     const priority = document.getElementById("priority-select").value;
 
     if (editingTaskId !== null) {
-      const t = tasks.find(task => task.id === editingTaskId);
-      if (t) {
-        t.subject = subject;
-        t.task = taskText;
-        t.givenDate = givenDate;
-        t.dueDate = dueDate;
-        t.who = who;
-        t.taskType = taskType;
-        t.priority = priority;
-      }
+      await updateDoc(doc(db, "families", currentUid, "tasks", editingTaskId), {
+        subject, task: taskText, givenDate, dueDate, who, taskType, priority
+      });
     } else {
-      tasks.push({
-        id: Date.now(),
+      await addDoc(collection(db, "families", currentUid, "tasks"), {
         studentId: currentStudentId,
         subject, task: taskText, givenDate, dueDate, who, taskType, priority,
         completed: false
       });
     }
 
-    renderAll();
     populateSubjectDropdown();
     closeModal();
   });
 }
 
 /* =========================================================
-   6. PASTE WHATSAPP MESSAGE + PARSING
+   7. PASTE WHATSAPP MESSAGE + PARSING
    ========================================================= */
 function setupPasteMessageModal() {
   const modal = document.getElementById("paste-message-modal");
   const openTriggers = [document.getElementById("open-paste-message"), document.getElementById("nav-whatsapp")];
 
   openTriggers.forEach(btn => btn.addEventListener("click", () => {
+    if (!currentStudentId) {
+      alert("Please add a student first (tap 'Add Student' below).");
+      return;
+    }
     document.getElementById("paste-message-text").value = "";
     modal.hidden = false;
   }));
@@ -275,7 +385,7 @@ function setupPasteMessageModal() {
   document.getElementById("close-paste-message").addEventListener("click", () => modal.hidden = true);
   modal.addEventListener("click", (e) => { if (e.target.id === "paste-message-modal") modal.hidden = true; });
 
-  document.getElementById("parse-message-btn").addEventListener("click", () => {
+  document.getElementById("parse-message-btn").addEventListener("click", async () => {
     const rawText = document.getElementById("paste-message-text").value.trim();
     if (!rawText) {
       alert("Please paste a message first.");
@@ -286,8 +396,7 @@ function setupPasteMessageModal() {
     modal.hidden = true;
 
     if (autoAddEnabled) {
-      tasks.push({
-        id: Date.now(),
+      await addDoc(collection(db, "families", currentUid, "tasks"), {
         studentId: currentStudentId,
         subject: parsedTask.subject,
         task: parsedTask.task,
@@ -298,7 +407,6 @@ function setupPasteMessageModal() {
         priority: parsedTask.priority,
         completed: false
       });
-      renderAll();
       alert("Task added automatically. You can edit it anytime using the ✏️ icon.");
     } else {
       openReviewModal(parsedTask);
@@ -360,7 +468,7 @@ function parseMessageToTask(text) {
 }
 
 /* =========================================================
-   7. HELPERS: dates
+   8. HELPERS: dates
    ========================================================= */
 function formatDate(dateStr) {
   const d = new Date(dateStr);
@@ -368,11 +476,6 @@ function formatDate(dateStr) {
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = String(d.getFullYear()).slice(-2);
   return `${day}-${month}-${year}`;
-}
-
-function dayName(dateStr) {
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  return days[new Date(dateStr).getDay()];
 }
 
 function daysLeft(dueDateStr) {
@@ -392,7 +495,7 @@ function isToday(dateStr) {
 }
 
 /* =========================================================
-   8. AUTO PRIORITY UPGRADE RULE (skips completed tasks)
+   9. AUTO PRIORITY UPGRADE RULE (display-only, not saved)
    ========================================================= */
 function applyPriorityRules(taskList) {
   taskList.forEach(t => {
@@ -404,7 +507,7 @@ function applyPriorityRules(taskList) {
 }
 
 /* =========================================================
-   9. PRIORITY / ROW META
+   10. PRIORITY / ROW META
    ========================================================= */
 function priorityBallClass(t) {
   if (t.completed) return "ball-completed";
@@ -420,9 +523,6 @@ function priorityRowClass(t) {
   return "row-low";
 }
 
-/* =========================================================
-   10. BUILD ONE TASK ROW (4-column layout)
-   ========================================================= */
 function daysBadgeClass(t) {
   if (t.completed) return "days-badge-completed";
   if (t.priority === "Urgent") return "days-badge-urgent";
@@ -438,6 +538,9 @@ function buildDaysLabel(t) {
   return `${left} day${left === 1 ? "" : "s"} left`;
 }
 
+/* =========================================================
+   11. BUILD ONE TASK ROW
+   ========================================================= */
 function buildTaskRow(t) {
   const daysLabel = buildDaysLabel(t);
 
@@ -472,36 +575,33 @@ function buildTaskRow(t) {
 }
 
 /* =========================================================
-   11. TABLE ACTIONS (checkbox / edit / delete)
+   12. TABLE ACTIONS
    ========================================================= */
 function attachRowActionListeners(containerId) {
   const container = document.getElementById(containerId);
 
-  container.addEventListener("click", (e) => {
+  container.addEventListener("click", async (e) => {
     const icon = e.target.closest(".action-icon");
     if (!icon) return;
 
-    const id = Number(icon.dataset.id);
+    const id = icon.dataset.id;
     const action = icon.dataset.action;
 
     if (action === "edit") openEditModal(id);
 
     if (action === "delete") {
       if (confirm("Delete this task? This cannot be undone.")) {
-        tasks = tasks.filter(t => t.id !== id);
-        renderAll();
+        await deleteDoc(doc(db, "families", currentUid, "tasks", id));
       }
     }
   });
 
-  container.addEventListener("change", (e) => {
+  container.addEventListener("change", async (e) => {
     if (e.target.classList.contains("done-checkbox")) {
-      const id = Number(e.target.dataset.id);
-      const t = tasks.find(task => task.id === id);
-      if (t) {
-        t.completed = e.target.checked;
-        renderAll();
-      }
+      const id = e.target.dataset.id;
+      await updateDoc(doc(db, "families", currentUid, "tasks", id), {
+        completed: e.target.checked
+      });
     }
   });
 }
@@ -512,7 +612,7 @@ function setupTaskTableActions() {
 }
 
 /* =========================================================
-   COMPLETED SECTION TOGGLE
+   13. COMPLETED SECTION TOGGLE
    ========================================================= */
 function setupCompletedToggle() {
   const toggleBtn = document.getElementById("completed-toggle");
@@ -526,7 +626,7 @@ function setupCompletedToggle() {
 }
 
 /* =========================================================
-   12. SORT: expired first, then soonest due date (automatic)
+   14. SORT + FILTER
    ========================================================= */
 function getSortedPending(taskList) {
   return taskList.filter(t => !t.completed)
@@ -538,9 +638,6 @@ function getSortedCompleted(taskList) {
     .sort((a, b) => daysLeft(a.dueDate) - daysLeft(b.dueDate));
 }
 
-/* =========================================================
-   13. FILTERS
-   ========================================================= */
 let currentFilter = "all";
 
 function getFilteredTasks() {
@@ -573,13 +670,19 @@ function setupFilterButtons() {
 }
 
 /* =========================================================
-   14. RENDER
+   15. RENDER
    ========================================================= */
 function renderPendingTasks() {
   applyPriorityRules(tasks);
   const filtered = getFilteredTasks();
   const pending = getSortedPending(filtered);
   const body = document.getElementById("task-table-body");
+
+  if (!students.length) {
+    body.innerHTML = `<p class="empty-message">No students yet. Tap "Add Student" below to get started.</p>`;
+    return;
+  }
+
   body.innerHTML = pending.length
     ? pending.map(buildTaskRow).join("")
     : `<p class="empty-message">No pending tasks. Nice work!</p>`;
@@ -616,7 +719,7 @@ function renderAll() {
 }
 
 /* =========================================================
-   15. BOTTOM NAV (Home / About view switching)
+   16. BOTTOM NAV
    ========================================================= */
 function setupBottomNav() {
   document.querySelectorAll(".nav-btn[data-view]").forEach(btn => {
@@ -632,10 +735,11 @@ function setupBottomNav() {
 }
 
 /* =========================================================
-   16. RUN ON PAGE LOAD
+   17. RUN ON PAGE LOAD
    ========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  renderStudentSwitcher();
+  setupLoginScreen();
+  setupLogout();
   setupStudentSwitcher();
   setupAddStudentModal();
   populateSubjectDropdown();
@@ -649,5 +753,4 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFilterButtons();
   setupBottomNav();
   document.getElementById("filter-all").classList.add("active");
-  renderAll();
 });
