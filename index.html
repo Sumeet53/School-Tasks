@@ -281,6 +281,25 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+    <script src="app.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      if (navigator.serviceWorker.controller) {
+        console.log("Active service worker found, no need to register.");
+      } else {
+        navigator.serviceWorker
+          .register("sw.js", { scope: "./" })
+          .then(function (reg) {
+            console.log("Service worker registered for scope: " + reg.scope);
+          })
+          .catch(function (err) {
+            console.error("Service worker registration failed:", err);
+          });
+      }
+    }
+  </script>
+</body>
+</html>
 </body>
 </html>
