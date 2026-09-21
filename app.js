@@ -81,7 +81,7 @@ function humanizeAuthError(code) {
 }
 
 function setupLogout() {
-  document.getElementById("logout-btn").addEventListener("click", () => {
+  document.getElementById("nav-logout").addEventListener("click", () => {
     if (confirm("Log out of SchoolTasks?")) {
       signOut(auth);
     }
@@ -273,7 +273,19 @@ function setupSubjectDropdown() {
 let editingTaskId = null;
 
 function todayISO() {
-  return new Date().toISOString().split("T")[0];
+  return addDaysLocalISO(0);
+}
+
+// Returns a YYYY-MM-DD string for "N days from today," calculated using
+// the device's LOCAL date/time (avoids timezone rollover bugs that
+// toISOString() can cause, since that converts to UTC first).
+function addDaysLocalISO(daysFromToday) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromToday);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function openAddModal() {
@@ -438,19 +450,31 @@ function parseMessageToTask(text) {
   let foundWho = "Student";
   if (/\bparents?\b/.test(lowerText)) foundWho = "Parent";
 
-  let foundDueDate = "";
-  const dateMatch = text.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
-  if (dateMatch) {
-    const day = dateMatch[1].padStart(2, "0");
-    const month = dateMatch[2].padStart(2, "0");
-    let year = dateMatch[3] ? dateMatch[3] : new Date().getFullYear().toString();
-    if (year.length === 2) year = "20" + year;
-    foundDueDate = `${year}-${month}-${day}`;
+   let foundDueDate = "";
+
+  // First, check for relative-day keywords (checked in this order so
+  // "day after tomorrow" is matched before the shorter "tomorrow")
+  if (/\bday after tomorrow\b/.test(lowerText)) {
+    foundDueDate = addDaysLocalISO(2);
+  } else if (/\btomorrow\b/.test(lowerText)) {
+    foundDueDate = addDaysLocalISO(1);
+  } else if (/\btoday\b/.test(lowerText)) {
+    foundDueDate = addDaysLocalISO(0);
+  } else {
+    // Otherwise, look for a numeric date like 25/09 or 25-09-2026
+    const dateMatch = text.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
+    if (dateMatch) {
+      const day = dateMatch[1].padStart(2, "0");
+      const month = dateMatch[2].padStart(2, "0");
+      let year = dateMatch[3] ? dateMatch[3] : new Date().getFullYear().toString();
+      if (year.length === 2) year = "20" + year;
+      foundDueDate = `${year}-${month}-${day}`;
+    }
   }
+
+  // Final fallback if nothing was recognized at all
   if (!foundDueDate) {
-    const fallback = new Date();
-    fallback.setDate(fallback.getDate() + 3);
-    foundDueDate = fallback.toISOString().split("T")[0];
+    foundDueDate = addDaysLocalISO(3);
   }
 
   let foundTaskText = text.trim();
