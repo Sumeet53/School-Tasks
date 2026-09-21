@@ -729,3 +729,96 @@ body {
 .disclaimer-block p:last-child {
   margin-bottom: 0;
 }
+/* =========================================================
+   LOGIN SCREEN
+   ========================================================= */
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg);
+  padding: 20px;
+}
+
+.login-box {
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 30px 24px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.login-logo { font-size: 2.2rem; margin-bottom: 6px; }
+.login-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+.login-subtitle { font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 18px; }
+
+#login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+#login-form label { font-size: 0.8rem; font-weight: 600; color: #444; }
+
+#login-form input {
+  padding: 10px;
+  font-size: 0.92rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  width: 100%;
+}
+
+#login-form input:focus { outline: none; border-color: var(--brand-navy); }
+
+.login-error {
+  color: #c0392b;
+  font-size: 0.8rem;
+  background-color: #fdecea;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+#login-submit-btn {
+  margin-top: 4px;
+  padding: 12px;
+  background-color: var(--brand-navy);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#login-submit-btn:hover { background-color: var(--color-primary-dark); }
+
+.login-toggle-link {
+  margin-top: 16px;
+  background: none;
+  border: none;
+  color: var(--brand-blue);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ===== Logout button in Settings ===== */
+.logout-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 11px;
+  background-color: #fdecea;
+  color: #c0392b;
+  border: 1px solid #f5b7b1;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.logout-btn:hover { background-color: #fadbd8; }
