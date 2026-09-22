@@ -6,8 +6,10 @@ import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, signOut
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
 import {
-  getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot
+  getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot,
+  query, where, getDocs
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -192,12 +194,35 @@ function setupStudentSwitcher() {
   });
 }
 
-function setupAddStudentModal() {
+let editingStudentId = null; // null = adding a new student
+
+function openAddStudentModal() {
+  editingStudentId = null;
+  document.getElementById("add-student-form").reset();
+  document.getElementById("student-modal-title").textContent = "Add Student";
+  document.getElementById("student-submit-btn").textContent = "Add Student";
+  document.getElementById("add-student-modal").hidden = false;
+}
+
+function openEditStudentModal(studentId) {
+  const s = students.find(stu => stu.id === studentId);
+  if (!s) return;
+
+  editingStudentId = studentId;
+  document.getElementById("new-student-name").value = s.name;
+  document.getElementById("new-student-class").value = s.className;
+  document.getElementById("new-student-gender").value = s.gender;
+  document.getElementById("student-modal-title").textContent = "Edit Student";
+  document.getElementById("student-submit-btn").textContent = "Save Changes";
+  document.getElementById("add-student-modal").hidden = false;
+}
+
+function setupStudentModal() {
   const modal = document.getElementById("add-student-modal");
 
-  document.getElementById("nav-add-student").addEventListener("click", () => {
-    document.getElementById("add-student-form").reset();
-    modal.hidden = false;
+  document.getElementById("open-add-student-from-manage").addEventListener("click", () => {
+    document.getElementById("manage-students-modal").hidden = true;
+    openAddStudentModal();
   });
 
   document.getElementById("close-add-student").addEventListener("click", () => modal.hidden = true);
@@ -210,10 +235,80 @@ function setupAddStudentModal() {
     const gender = document.getElementById("new-student-gender").value;
     if (!name || !className || !currentUid) return;
 
-    const docRef = await addDoc(collection(db, "families", currentUid, "students"), { name, className, gender });
-    currentStudentId = docRef.id;
+    if (editingStudentId !== null) {
+      await updateDoc(doc(db, "families", currentUid, "students", editingStudentId), { name, className, gender });
+    } else {
+      const docRef = await addDoc(collection(db, "families", currentUid, "students"), { name, className, gender });
+      currentStudentId = docRef.id;
+    }
+
     modal.hidden = true;
   });
+}
+
+/* =========================================================
+   MANAGE STUDENTS (list, edit, delete)
+   ========================================================= */
+function setupManageStudentsModal() {
+  const modal = document.getElementById("manage-students-modal");
+
+  document.getElementById("nav-manage-students").addEventListener("click", () => {
+    renderManageStudentsList();
+    modal.hidden = false;
+  });
+
+  document.getElementById("close-manage-students").addEventListener("click", () => modal.hidden = true);
+  modal.addEventListener("click", (e) => { if (e.target.id === "manage-students-modal") modal.hidden = true; });
+
+  document.getElementById("manage-students-list").addEventListener("click", async (e) => {
+    const icon = e.target.closest(".manage-student-icon");
+    if (!icon) return;
+
+    const studentId = icon.dataset.id;
+    const action = icon.dataset.action;
+
+    if (action === "edit") {
+      modal.hidden = true;
+      openEditStudentModal(studentId);
+    }
+
+    if (action === "delete") {
+      const student = students.find(s => s.id === studentId);
+      const studentName = student ? student.name : "this student";
+      const confirmDelete = confirm(
+        `Delete ${studentName}? This will also permanently delete all of their tasks. This cannot be undone.`
+      );
+      if (!confirmDelete) return;
+
+      // Delete all tasks belonging to this student first
+      const tasksRef = collection(db, "families", currentUid, "tasks");
+      const q = query(tasksRef, where("studentId", "==", studentId));
+      const matchingTasks = await getDocs(q);
+      const deletions = matchingTasks.docs.map(taskDoc =>
+        deleteDoc(doc(db, "families", currentUid, "tasks", taskDoc.id))
+      );
+      await Promise.all(deletions);
+
+      // Then delete the student themselves
+      await deleteDoc(doc(db, "families", currentUid, "students", studentId));
+
+      renderManageStudentsList();
+    }
+  });
+}
+
+function renderManageStudentsList() {
+  const list = document.getElementById("manage-students-list");
+  list.innerHTML = students.length
+    ? students.map(s => `
+        <div class="manage-student-row">
+          <span class="manage-student-avatar">${genderAvatar(s.gender)}</span>
+          <span class="manage-student-name">${s.name} — ${s.className}</span>
+          <span class="manage-student-icon" data-action="edit" data-id="${s.id}" title="Edit">✏️</span>
+          <span class="manage-student-icon" data-action="delete" data-id="${s.id}" title="Delete">🗑️</span>
+        </div>
+      `).join("")
+    : `<p class="empty-message">No students yet — tap "+ Add New Student" below.</p>`;
 }
 
 /* =========================================================
@@ -764,7 +859,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupLoginScreen();
   setupLogout();
   setupStudentSwitcher();
-  setupAddStudentModal();
+  setupManageStudentsModal();
+  setupStudentModal();
   populateSubjectDropdown();
   setupSubjectDropdown();
   setupSettingsModal();
