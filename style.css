@@ -875,13 +875,56 @@ body {
 
 .add-new-student-btn {
   width: 100%;
-  padding: 11px;
-  background-color: var(--brand-navy);
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  padding: 13px;
+  background-color: #eaf1ff;
+  color: var(--brand-navy);
+  border: 2px dashed var(--brand-blue);
+  border-radius: 10px;
+  font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.15s ease, transform 0.1s ease;
 }
-.add-new-student-btn:hover { background-color: var(--color-primary-dark); }
+
+.add-new-student-btn:hover {
+  background-color: #dbe7ff;
+  transform: translateY(-1px);
+}
+
+.add-new-student-icon {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+/* ===== Success Toast Notification ===== */
+.toast {
+  position: fixed;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1e8449;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: top 0.3s ease;
+  max-width: 90%;
+  text-align: center;
+}
+
+.toast[hidden] { display: none; }
+
+.toast.toast-show {
+  top: 16px;
+}
+
+.toast-tick { font-size: 1rem; }
