@@ -228,7 +228,7 @@ function setupStudentModal() {
   document.getElementById("close-add-student").addEventListener("click", () => modal.hidden = true);
   modal.addEventListener("click", (e) => { if (e.target.id === "add-student-modal") modal.hidden = true; });
 
-  document.getElementById("add-student-form").addEventListener("submit", async (e) => {
+    document.getElementById("add-student-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = document.getElementById("new-student-name").value.trim();
     const className = document.getElementById("new-student-class").value.trim();
@@ -237,14 +237,15 @@ function setupStudentModal() {
 
     if (editingStudentId !== null) {
       await updateDoc(doc(db, "families", currentUid, "students", editingStudentId), { name, className, gender });
+      showToast(`${name}'s details updated`);
     } else {
       const docRef = await addDoc(collection(db, "families", currentUid, "students"), { name, className, gender });
       currentStudentId = docRef.id;
+      showToast(`${name} added`);
     }
 
     modal.hidden = true;
   });
-}
 
 /* =========================================================
    MANAGE STUDENTS (list, edit, delete)
@@ -292,6 +293,7 @@ function setupManageStudentsModal() {
       // Then delete the student themselves
       await deleteDoc(doc(db, "families", currentUid, "students", studentId));
 
+      showToast(`${studentName} deleted`);
       renderManageStudentsList();
     }
   });
@@ -471,7 +473,27 @@ function setupAddTaskForm() {
     closeModal();
   });
 }
+/* =========================================================
+   SUCCESS TOAST NOTIFICATION
+   ========================================================= */
+let toastTimer = null;
 
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.innerHTML = `<span class="toast-tick">✅</span> ${message}`;
+  toast.hidden = false;
+
+  // restart the fade-in animation each time
+  toast.classList.remove("toast-show");
+  void toast.offsetWidth; // force reflow so the animation replays
+  toast.classList.add("toast-show");
+
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove("toast-show");
+    toast.hidden = true;
+  }, 2200);
+}
 /* =========================================================
    7. PASTE WHATSAPP MESSAGE + PARSING
    ========================================================= */
