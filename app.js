@@ -228,7 +228,7 @@ function setupStudentModal() {
   document.getElementById("close-add-student").addEventListener("click", () => modal.hidden = true);
   modal.addEventListener("click", (e) => { if (e.target.id === "add-student-modal") modal.hidden = true; });
 
-    document.getElementById("add-student-form").addEventListener("submit", async (e) => {
+      document.getElementById("add-student-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = document.getElementById("new-student-name").value.trim();
     const className = document.getElementById("new-student-class").value.trim();
@@ -246,6 +246,7 @@ function setupStudentModal() {
 
     modal.hidden = true;
   });
+}
 
 /* =========================================================
    MANAGE STUDENTS (list, edit, delete)
