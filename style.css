@@ -841,3 +841,47 @@ body {
   border-radius: 8px;
   display: block;
 }
+/* ===== Manage Students list ===== */
+#manage-students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.manage-student-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background-color: #f4f6f8;
+  border-radius: 8px;
+}
+
+.manage-student-avatar { font-size: 1.3rem; }
+
+.manage-student-name {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.manage-student-icon {
+  cursor: pointer;
+  font-size: 1rem;
+}
+.manage-student-icon:hover { transform: scale(1.15); }
+
+.add-new-student-btn {
+  width: 100%;
+  padding: 11px;
+  background-color: var(--brand-navy);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.add-new-student-btn:hover { background-color: var(--color-primary-dark); }
