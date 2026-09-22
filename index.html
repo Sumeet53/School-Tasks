@@ -184,8 +184,8 @@
       <button class="nav-btn" id="nav-whatsapp">
         <span class="nav-icon">💬</span><span>WhatsApp</span>
       </button>
-      <button class="nav-btn" id="nav-add-student">
-        <span class="nav-icon">👤➕</span><span>Add Student</span>
+      <button class="nav-btn" id="nav-manage-students">
+        <span class="nav-icon">👥</span><span>Manage Students</span>
       </button>
       <button class="nav-btn" data-view="about">
         <span class="nav-icon">ℹ️</span><span>About Us</span>
@@ -208,27 +208,36 @@
       </div>
     </div>
 
-    <div id="add-student-modal" class="modal-overlay" hidden>
-      <div class="modal-content">
-        <button id="close-add-student" class="modal-close" title="Close">&times;</button>
-        <h2>Add Student</h2>
-        <form id="add-student-form">
-          <label for="new-student-name">Student Name</label>
-          <input type="text" id="new-student-name" required />
-
-          <label for="new-student-class">Class</label>
-          <input type="text" id="new-student-class" placeholder="e.g. Class 5" required />
-
-          <label for="new-student-gender">Gender</label>
-          <select id="new-student-gender" required>
-            <option value="Boy">Boy</option>
-            <option value="Girl">Girl</option>
-          </select>
-
-          <button type="submit">Add Student</button>
-        </form>
-      </div>
+      <div id="manage-students-modal" class="modal-overlay" hidden>
+    <div class="modal-content">
+      <button id="close-manage-students" class="modal-close" title="Close">&times;</button>
+      <h2>Manage Students</h2>
+      <div id="manage-students-list"></div>
+      <button id="open-add-student-from-manage" class="add-new-student-btn">+ Add New Student</button>
     </div>
+  </div>
+
+  <div id="add-student-modal" class="modal-overlay" hidden>
+    <div class="modal-content">
+      <button id="close-add-student" class="modal-close" title="Close">&times;</button>
+      <h2 id="student-modal-title">Add Student</h2>
+      <form id="add-student-form">
+        <label for="new-student-name">Student Name</label>
+        <input type="text" id="new-student-name" required />
+
+        <label for="new-student-class">Class</label>
+        <input type="text" id="new-student-class" placeholder="e.g. Class 5" required />
+
+        <label for="new-student-gender">Gender</label>
+        <select id="new-student-gender" required>
+          <option value="Boy">Boy</option>
+          <option value="Girl">Girl</option>
+        </select>
+
+        <button type="submit" id="student-submit-btn">Add Student</button>
+      </form>
+    </div>
+  </div>
 
     <div id="paste-message-modal" class="modal-overlay" hidden>
       <div class="modal-content">
