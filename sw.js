@@ -4,7 +4,7 @@
    (with the last-loaded data) even with a poor/no connection.
    ========================================================= */
 
-const CACHE_NAME = "schooltasks-cache-v8";
+const CACHE_NAME = "schooltasks-cache-v9";
 
 const FILES_TO_CACHE = [
   "./index.html",
@@ -52,6 +52,14 @@ self.addEventListener("activate", (event) => {
 // Fetch: serve from cache first, fall back to network,
 // and cache anything new we successfully fetch.
 self.addEventListener("fetch", (event) => {
+  // Only cache simple GET requests for our own files.
+  // Firebase login/database calls use POST and other methods that
+  // browsers don't allow caching — skip those and let them go
+  // straight to the network untouched.
+  if (event.request.method !== "GET") {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
