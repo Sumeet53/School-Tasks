@@ -227,7 +227,6 @@ function setupSettingsModal() {
   toggle.checked = autoAddEnabled;
 
   document.getElementById("open-settings").addEventListener("click", () => modal.hidden = false);
-  document.getElementById("nav-settings").addEventListener("click", () => modal.hidden = false);
   document.getElementById("close-settings").addEventListener("click", () => modal.hidden = true);
   modal.addEventListener("click", (e) => { if (e.target.id === "settings-modal") modal.hidden = true; });
   toggle.addEventListener("change", () => { autoAddEnabled = toggle.checked; });
