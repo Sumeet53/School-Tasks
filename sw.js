@@ -4,7 +4,7 @@
    (with the last-loaded data) even with a poor/no connection.
    ========================================================= */
 
-const CACHE_NAME = "schooltasks-cache-v14";
+const CACHE_NAME = "schooltasks-cache-v15";
 
 const FILES_TO_CACHE = [
   "./index.html",
