@@ -926,3 +926,20 @@ body {
 }
 
 .toast-tick { font-size: 1rem; }
+/* ===== Privacy Policy page ===== */
+#policy-view {
+  max-width: 900px;
+  margin: 16px auto;
+  padding: 0 16px;
+}
+
+.policy-back-link {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.policy-back-link a {
+  color: var(--brand-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
