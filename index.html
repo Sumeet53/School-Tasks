@@ -207,7 +207,10 @@
           <small>(If off, you'll review &amp; confirm each task first)</small></span>
           <input type="checkbox" id="auto-add-toggle" />
         </label>
-        <button id="settings-ok-btn" class="settings-ok-btn">✅ OK</button>
+          <button id="settings-ok-btn" class="settings-ok-btn">✅ OK</button>
+        <div class="danger-zone">
+          <button id="open-delete-account" class="delete-account-btn">🗑️ Delete My Account</button>
+        </div>
       </div>
     </div>
 
@@ -219,6 +222,28 @@
         <button id="open-add-student-from-manage" class="add-new-student-btn">
         <span class="add-new-student-icon">＋</span> Add New Student
       </button>
+    </div>
+  </div>
+
+   <div id="delete-account-modal" class="modal-overlay" hidden>
+    <div class="modal-content">
+      <button id="close-delete-account" class="modal-close" title="Close">&times;</button>
+      <h2>Delete My Account</h2>
+      <p class="delete-warning">
+        ⚠️ This will <strong>permanently delete</strong> your account, all students, and
+        all tasks. This action <strong>cannot be undone</strong>.
+      </p>
+      <form id="delete-account-form">
+        <label for="delete-account-password">Enter your password to confirm</label>
+        <input type="password" id="delete-account-password" required />
+
+        <p id="delete-account-error" class="login-error" hidden></p>
+
+        <div class="delete-account-btn-row">
+          <button type="button" id="cancel-delete-account" class="cancel-delete-btn">Cancel</button>
+          <button type="submit" id="confirm-delete-account-btn" class="confirm-delete-btn">Permanently Delete My Account</button>
+        </div>
+      </form>
     </div>
   </div>
 
