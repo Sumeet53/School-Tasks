@@ -4,7 +4,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-  createUserWithEmailAndPassword, signOut
+  createUserWithEmailAndPassword, signOut,
+  EmailAuthProvider, reauthenticateWithCredential, deleteUser
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 import {
@@ -86,6 +87,69 @@ function setupLogout() {
   document.getElementById("nav-logout").addEventListener("click", () => {
     if (confirm("Log out of SchoolTasks?")) {
       signOut(auth);
+    }
+  });
+}
+
+/* =========================================================
+   DELETE MY ACCOUNT
+   ========================================================= */
+function setupDeleteAccountModal() {
+  const modal = document.getElementById("delete-account-modal");
+  const errorEl = document.getElementById("delete-account-error");
+  const form = document.getElementById("delete-account-form");
+
+  document.getElementById("open-delete-account").addEventListener("click", () => {
+    document.getElementById("settings-modal").hidden = true;
+    document.getElementById("delete-account-password").value = "";
+    errorEl.hidden = true;
+    modal.hidden = false;
+  });
+
+  document.getElementById("close-delete-account").addEventListener("click", () => modal.hidden = true);
+  document.getElementById("cancel-delete-account").addEventListener("click", () => modal.hidden = true);
+  modal.addEventListener("click", (e) => { if (e.target.id === "delete-account-modal") modal.hidden = true; });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.hidden = true;
+
+    const password = document.getElementById("delete-account-password").value;
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const confirmBtn = document.getElementById("confirm-delete-account-btn");
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = "Deleting...";
+
+    try {
+      // Re-confirm identity before allowing account deletion
+      const credential = EmailAuthProvider.credential(user.email, password);
+      await reauthenticateWithCredential(user, credential);
+
+      // Delete all students
+      const studentsSnap = await getDocs(collection(db, "families", currentUid, "students"));
+      await Promise.all(studentsSnap.docs.map(d => deleteDoc(doc(db, "families", currentUid, "students", d.id))));
+
+      // Delete all tasks
+      const tasksSnap = await getDocs(collection(db, "families", currentUid, "tasks"));
+      await Promise.all(tasksSnap.docs.map(d => deleteDoc(doc(db, "families", currentUid, "tasks", d.id))));
+
+      // Finally, delete the login account itself
+      await deleteUser(user);
+
+      modal.hidden = true;
+      // onAuthStateChanged will automatically show the login screen
+    } catch (err) {
+      let msg = "Something went wrong. Please try again.";
+      if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
+        msg = "Incorrect password. Please try again.";
+      }
+      errorEl.textContent = msg;
+      errorEl.hidden = false;
+    } finally {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "Permanently Delete My Account";
     }
   });
 }
@@ -881,6 +945,7 @@ function setupBottomNav() {
 document.addEventListener("DOMContentLoaded", () => {
   setupLoginScreen();
   setupLogout();
+  setupDeleteAccountModal();
   setupStudentSwitcher();
   setupManageStudentsModal();
   setupStudentModal();
