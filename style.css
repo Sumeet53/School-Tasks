@@ -1022,3 +1022,7 @@ body {
 }
 .confirm-delete-btn:hover { background-color: #a5281b; }
 .confirm-delete-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.inline-link {
+  color: var(--brand-blue);
+  font-weight: 600;
+}
