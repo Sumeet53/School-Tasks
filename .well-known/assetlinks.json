@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.opalunalabs.schooltasks",
+    "sha256_cert_fingerprints": ["03:18:C5:F9:3D:73:1C:46:5A:8F:42:FF:79:B7:A7:E9:82:7D:BF:75:ED:FC:4F:2B:AC:8B:B3:61:F0:80:86:24"]
+  }
+}]
