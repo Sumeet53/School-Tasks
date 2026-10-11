@@ -160,6 +160,7 @@ function setupDeleteAccountModal() {
 onAuthStateChanged(auth, (user) => {
   const loginScreen = document.getElementById("login-screen");
   const appRoot = document.getElementById("app-root");
+  document.getElementById("auth-loading").hidden = true;
 
   if (user) {
     currentUid = user.uid;
