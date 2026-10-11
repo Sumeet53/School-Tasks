@@ -3,6 +3,9 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.opalunalabs.schooltasks",
-    "sha256_cert_fingerprints": ["03:18:C5:F9:3D:73:1C:46:5A:8F:42:FF:79:B7:A7:E9:82:7D:BF:75:ED:FC:4F:2B:AC:8B:B3:61:F0:80:86:24"]
+    "sha256_cert_fingerprints": [
+      "03:18:C5:F9:3D:73:1C:46:5A:8F:42:FF:79:B7:A7:E9:82:7D:BF:75:ED:FC:4F:2B:AC:8B:B3:61:F0:80:86:24",
+      "9A:19:12:BF:7E:26:D0:03:04:E5:9D:B5:D8:43:9B:92:C1:5C:89:0C:EA:61:A4:ED:4D:E9:AA:3B:54:06:DC:69"
+    ]
   }
 }]
