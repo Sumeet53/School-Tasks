@@ -1026,3 +1026,60 @@ body {
   color: var(--brand-blue);
   font-weight: 600;
 }
+
+/* Custom Native Modal */
+.custom-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+}
+.custom-modal-backdrop[hidden] {
+  display: none !important;
+}
+.custom-modal-box {
+  background: #ffffff;
+  border-radius: 14px;
+  max-width: 320px;
+  width: 100%;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  text-align: left;
+}
+.custom-modal-title {
+  margin: 0 0 8px 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.custom-modal-text {
+  margin: 0 0 20px 0;
+  font-size: 0.92rem;
+  color: #4b5563;
+  line-height: 1.45;
+}
+.custom-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.modal-btn {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+}
+.modal-cancel-btn {
+  background: #e5e7eb;
+  color: #374151;
+}
+.modal-delete-btn {
+  background: #dc2626;
+  color: #ffffff;
+}
