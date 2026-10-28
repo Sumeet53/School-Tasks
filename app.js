@@ -783,6 +783,39 @@ function buildTaskRow(t) {
 /* =========================================================
    12. TABLE ACTIONS
    ========================================================= */
+let onConfirmAction = null;
+
+function showConfirmDialog(title, message, btnText, onConfirm) {
+  const modal = document.getElementById("confirm-dialog-modal");
+  document.getElementById("confirm-dialog-title").textContent = title;
+  document.getElementById("confirm-dialog-message").textContent = message;
+  const okBtn = document.getElementById("confirm-dialog-ok");
+  okBtn.textContent = btnText;
+  onConfirmAction = onConfirm;
+  modal.hidden = false;
+}
+
+function setupConfirmDialog() {
+  const modal = document.getElementById("confirm-dialog-modal");
+  document.getElementById("confirm-dialog-cancel").addEventListener("click", () => {
+    modal.hidden = true;
+    onConfirmAction = null;
+  });
+  document.getElementById("confirm-dialog-ok").addEventListener("click", () => {
+    modal.hidden = true;
+    if (onConfirmAction) {
+      onConfirmAction();
+      onConfirmAction = null;
+    }
+  });
+  modal.addEventListener("click", (e) => {
+    if (e.target.id === "confirm-dialog-modal") {
+      modal.hidden = true;
+      onConfirmAction = null;
+    }
+  });
+}
+
 function attachRowActionListeners(containerId) {
   const container = document.getElementById(containerId);
 
@@ -796,9 +829,9 @@ function attachRowActionListeners(containerId) {
     if (action === "edit") openEditModal(id);
 
     if (action === "delete") {
-      if (confirm("Delete this task? This cannot be undone.")) {
+      showConfirmDialog("Delete Task?", "This task will be permanently removed. This cannot be undone.", "Delete", async () => {
         await deleteDoc(doc(db, "families", currentUid, "tasks", id));
-      }
+      });
     }
   });
 
@@ -956,6 +989,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupAddTaskModal();
   setupAddTaskForm();
   setupPasteMessageModal();
+  setupConfirmDialog();
   setupTaskTableActions();
   setupCompletedToggle();
   setupFilterButtons();
