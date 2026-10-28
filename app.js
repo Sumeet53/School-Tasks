@@ -1,17 +1,17 @@
 /* =========================================================
    0. FIREBASE SETUP
    ========================================================= */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { initializeApp } from "[https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js](https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js)";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, signOut,
   EmailAuthProvider, reauthenticateWithCredential, deleteUser
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+} from "[https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js](https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js)";
 
 import {
   getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot,
   query, where, getDocs
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+} from "[https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js](https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js)";
 
 const firebaseConfig = {
   apiKey: "AIzaSyADL-_-NBH55fb37CLUrllyZmKEsh8Bmno",
@@ -85,9 +85,9 @@ function humanizeAuthError(code) {
 
 function setupLogout() {
   document.getElementById("nav-logout").addEventListener("click", () => {
-    if (confirm("Log out of SchoolTasks?")) {
+    showConfirmDialog("Log Out?", "Are you sure you want to log out of SchoolTasks?", "Log Out", () => {
       signOut(auth);
-    }
+    });
   });
 }
 
@@ -123,23 +123,18 @@ function setupDeleteAccountModal() {
     confirmBtn.textContent = "Deleting...";
 
     try {
-      // Re-confirm identity before allowing account deletion
       const credential = EmailAuthProvider.credential(user.email, password);
       await reauthenticateWithCredential(user, credential);
 
-      // Delete all students
       const studentsSnap = await getDocs(collection(db, "families", currentUid, "students"));
       await Promise.all(studentsSnap.docs.map(d => deleteDoc(doc(db, "families", currentUid, "students", d.id))));
 
-      // Delete all tasks
       const tasksSnap = await getDocs(collection(db, "families", currentUid, "tasks"));
       await Promise.all(tasksSnap.docs.map(d => deleteDoc(doc(db, "families", currentUid, "tasks", d.id))));
 
-      // Finally, delete the login account itself
       await deleteUser(user);
 
       modal.hidden = true;
-      // onAuthStateChanged will automatically show the login screen
     } catch (err) {
       let msg = "Something went wrong. Please try again.";
       if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
@@ -181,11 +176,12 @@ onAuthStateChanged(auth, (user) => {
 });
 
 /* =========================================================
-   3. STUDENTS & TASKS (now backed by Firestore)
+   3. STUDENTS & TASKS (backed by Firestore)
    ========================================================= */
 let students = [];
 let tasks = [];
 let currentStudentId = null;
+let sharedTextHandled = false;
 
 function attachFirestoreListeners() {
   const studentsRef = collection(db, "families", currentUid, "students");
@@ -196,6 +192,9 @@ function attachFirestoreListeners() {
     }
     renderStudentSwitcher();
     renderAll();
+
+    // Trigger WhatsApp Share Target handler once student profiles load
+    handleIncomingSharedText();
   });
 
   const tasksRef = collection(db, "families", currentUid, "tasks");
@@ -259,7 +258,7 @@ function setupStudentSwitcher() {
   });
 }
 
-let editingStudentId = null; // null = adding a new student
+let editingStudentId = null;
 
 function openAddStudentModal() {
   editingStudentId = null;
@@ -293,7 +292,7 @@ function setupStudentModal() {
   document.getElementById("close-add-student").addEventListener("click", () => modal.hidden = true);
   modal.addEventListener("click", (e) => { if (e.target.id === "add-student-modal") modal.hidden = true; });
 
-      document.getElementById("add-student-form").addEventListener("submit", async (e) => {
+  document.getElementById("add-student-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = document.getElementById("new-student-name").value.trim();
     const className = document.getElementById("new-student-class").value.trim();
@@ -342,25 +341,25 @@ function setupManageStudentsModal() {
     if (action === "delete") {
       const student = students.find(s => s.id === studentId);
       const studentName = student ? student.name : "this student";
-      const confirmDelete = confirm(
-        `Delete ${studentName}? This will also permanently delete all of their tasks. This cannot be undone.`
+
+      showConfirmDialog(
+        `Delete ${studentName}?`,
+        `This will permanently delete ${studentName} and all of their tasks. This cannot be undone.`,
+        "Delete",
+        async () => {
+          const tasksRef = collection(db, "families", currentUid, "tasks");
+          const q = query(tasksRef, where("studentId", "==", studentId));
+          const matchingTasks = await getDocs(q);
+          const deletions = matchingTasks.docs.map(taskDoc =>
+            deleteDoc(doc(db, "families", currentUid, "tasks", taskDoc.id))
+          );
+          await Promise.all(deletions);
+
+          await deleteDoc(doc(db, "families", currentUid, "students", studentId));
+          showToast(`${studentName} deleted`);
+          renderManageStudentsList();
+        }
       );
-      if (!confirmDelete) return;
-
-      // Delete all tasks belonging to this student first
-      const tasksRef = collection(db, "families", currentUid, "tasks");
-      const q = query(tasksRef, where("studentId", "==", studentId));
-      const matchingTasks = await getDocs(q);
-      const deletions = matchingTasks.docs.map(taskDoc =>
-        deleteDoc(doc(db, "families", currentUid, "tasks", taskDoc.id))
-      );
-      await Promise.all(deletions);
-
-      // Then delete the student themselves
-      await deleteDoc(doc(db, "families", currentUid, "students", studentId));
-
-      showToast(`${studentName} deleted`);
-      renderManageStudentsList();
     }
   });
 }
@@ -380,7 +379,7 @@ function renderManageStudentsList() {
 }
 
 /* =========================================================
-   4. SETTINGS (Auto vs Manual add) + Logout
+   4. SETTINGS (Auto vs Manual add)
    ========================================================= */
 let autoAddEnabled = false;
 
@@ -397,7 +396,7 @@ function setupSettingsModal() {
 }
 
 /* =========================================================
-   5. SUBJECT SHORT-NAME LIST (local per device)
+   5. SUBJECT SHORT-NAME LIST
    ========================================================= */
 let subjectList = [
   "Maths", "EVS", "English", "Hindi", "Science", "SST",
@@ -438,9 +437,6 @@ function todayISO() {
   return addDaysLocalISO(0);
 }
 
-// Returns a YYYY-MM-DD string for "N days from today," calculated using
-// the device's LOCAL date/time (avoids timezone rollover bugs that
-// toISOString() can cause, since that converts to UTC first).
 function addDaysLocalISO(daysFromToday) {
   const d = new Date();
   d.setDate(d.getDate() + daysFromToday);
@@ -539,6 +535,7 @@ function setupAddTaskForm() {
     closeModal();
   });
 }
+
 /* =========================================================
    SUCCESS TOAST NOTIFICATION
    ========================================================= */
@@ -549,9 +546,8 @@ function showToast(message) {
   toast.innerHTML = `<span class="toast-tick">✅</span> ${message}`;
   toast.hidden = false;
 
-  // restart the fade-in animation each time
   toast.classList.remove("toast-show");
-  void toast.offsetWidth; // force reflow so the animation replays
+  void toast.offsetWidth;
   toast.classList.add("toast-show");
 
   if (toastTimer) clearTimeout(toastTimer);
@@ -560,6 +556,7 @@ function showToast(message) {
     toast.hidden = true;
   }, 2200);
 }
+
 /* =========================================================
    7. PASTE WHATSAPP MESSAGE + PARSING
    ========================================================= */
@@ -601,7 +598,7 @@ function setupPasteMessageModal() {
         priority: parsedTask.priority,
         completed: false
       });
-      alert("Task added automatically. You can edit it anytime using the ✏️ icon.");
+      showToast("Task added automatically");
     } else {
       openReviewModal(parsedTask);
     }
@@ -632,10 +629,8 @@ function parseMessageToTask(text) {
   let foundWho = "Student";
   if (/\bparents?\b/.test(lowerText)) foundWho = "Parent";
 
-   let foundDueDate = "";
+  let foundDueDate = "";
 
-  // First, check for relative-day keywords (checked in this order so
-  // "day after tomorrow" is matched before the shorter "tomorrow")
   if (/\bday after tomorrow\b/.test(lowerText)) {
     foundDueDate = addDaysLocalISO(2);
   } else if (/\btomorrow\b/.test(lowerText)) {
@@ -643,7 +638,6 @@ function parseMessageToTask(text) {
   } else if (/\btoday\b/.test(lowerText)) {
     foundDueDate = addDaysLocalISO(0);
   } else {
-    // Otherwise, look for a numeric date like 25/09 or 25-09-2026
     const dateMatch = text.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
     if (dateMatch) {
       const day = dateMatch[1].padStart(2, "0");
@@ -654,7 +648,6 @@ function parseMessageToTask(text) {
     }
   }
 
-  // Final fallback if nothing was recognized at all
   if (!foundDueDate) {
     foundDueDate = addDaysLocalISO(3);
   }
@@ -671,6 +664,55 @@ function parseMessageToTask(text) {
     taskType: foundTaskType,
     priority: foundPriority
   };
+}
+
+/* =========================================================
+   SHARE TARGET HANDLER (Direct from WhatsApp)
+   ========================================================= */
+function handleIncomingSharedText() {
+  if (sharedTextHandled) return;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedText = urlParams.get("shared_text") || "";
+  const sharedUrl = urlParams.get("shared_url") || "";
+  const sharedTitle = urlParams.get("shared_title") || "";
+
+  const combinedPayload = [sharedTitle, sharedText, sharedUrl]
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+
+  if (!combinedPayload) return;
+
+  sharedTextHandled = true;
+
+  const cleanUrl = window.location.origin + window.location.pathname;
+  window.history.replaceState({}, document.title, cleanUrl);
+
+  if (!currentStudentId) {
+    alert("Message received! Please add or select a student first.");
+    return;
+  }
+
+  const parsedTask = parseMessageToTask(combinedPayload);
+
+  if (autoAddEnabled && currentUid) {
+    addDoc(collection(db, "families", currentUid, "tasks"), {
+      studentId: currentStudentId,
+      subject: parsedTask.subject,
+      task: parsedTask.task,
+      givenDate: parsedTask.givenDate,
+      dueDate: parsedTask.dueDate,
+      who: parsedTask.who,
+      taskType: parsedTask.taskType,
+      priority: parsedTask.priority,
+      completed: false
+    }).then(() => {
+      showToast("Task imported directly from WhatsApp");
+    });
+  } else {
+    openReviewModal(parsedTask);
+  }
 }
 
 /* =========================================================
@@ -701,7 +743,7 @@ function isToday(dateStr) {
 }
 
 /* =========================================================
-   9. AUTO PRIORITY UPGRADE RULE (display-only, not saved)
+   9. AUTO PRIORITY UPGRADE RULE
    ========================================================= */
 function applyPriorityRules(taskList) {
   taskList.forEach(t => {
@@ -781,12 +823,13 @@ function buildTaskRow(t) {
 }
 
 /* =========================================================
-   12. TABLE ACTIONS
+   12. NATIVE CONFIRM MODAL & TABLE ACTIONS
    ========================================================= */
 let onConfirmAction = null;
 
 function showConfirmDialog(title, message, btnText, onConfirm) {
   const modal = document.getElementById("confirm-dialog-modal");
+  if (!modal) return;
   document.getElementById("confirm-dialog-title").textContent = title;
   document.getElementById("confirm-dialog-message").textContent = message;
   const okBtn = document.getElementById("confirm-dialog-ok");
@@ -797,10 +840,13 @@ function showConfirmDialog(title, message, btnText, onConfirm) {
 
 function setupConfirmDialog() {
   const modal = document.getElementById("confirm-dialog-modal");
+  if (!modal) return;
+
   document.getElementById("confirm-dialog-cancel").addEventListener("click", () => {
     modal.hidden = true;
     onConfirmAction = null;
   });
+
   document.getElementById("confirm-dialog-ok").addEventListener("click", () => {
     modal.hidden = true;
     if (onConfirmAction) {
@@ -808,6 +854,7 @@ function setupConfirmDialog() {
       onConfirmAction = null;
     }
   });
+
   modal.addEventListener("click", (e) => {
     if (e.target.id === "confirm-dialog-modal") {
       modal.hidden = true;
