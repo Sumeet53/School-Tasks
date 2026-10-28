@@ -12,6 +12,15 @@
   "categories": ["education", "productivity"],
   "prefer_related_applications": false,
   "related_applications": [],
+  "share_target": {
+    "action": "/School-Tasks/",
+    "method": "GET",
+    "params": {
+      "title": "shared_title",
+      "text": "shared_text",
+      "url": "shared_url"
+    }
+  },
   "icons": [
     {
       "src": "/School-Tasks/icon-192.png",
