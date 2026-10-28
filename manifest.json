@@ -3,7 +3,7 @@
   "name": "SchoolTasks",
   "short_name": "SchoolTasks",
   "description": "Track school tasks from teacher WhatsApp messages, organized for parents and students.",
-  "start_url": "/School-Tasks/index.html",
+  "start_url": "/School-Tasks/",
   "scope": "/School-Tasks/",
   "display": "standalone",
   "background_color": "#f4f6f8",
