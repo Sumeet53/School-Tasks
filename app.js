@@ -618,6 +618,7 @@ function parseMessageToTask(text) {
 
   let foundTaskType = "Other";
   if (/\bexam\b|\btest\b/.test(lowerText)) foundTaskType = "Exam / Test";
+  else if (/\bholiday\b|\bvacation\b/.test(lowerText)) foundTaskType = "Holiday";
   else if (/\bproject\b/.test(lowerText)) foundTaskType = "Project";
   else if (/\bbring\b/.test(lowerText)) foundTaskType = "Bring something";
   else if (/\brevis(e|ion)\b/.test(lowerText)) foundTaskType = "Revision";
@@ -631,6 +632,18 @@ function parseMessageToTask(text) {
 
   let foundDueDate = "";
 
+  const monthNames = {
+    jan: "01", january: "01", feb: "02", february: "02",
+    mar: "03", march: "03", apr: "04", april: "04",
+    may: "05", jun: "06", june: "06", jul: "07", july: "07",
+    aug: "08", august: "08", sep: "09", sept: "09", september: "09",
+    oct: "10", october: "10", nov: "11", november: "11",
+    dec: "12", december: "12"
+  };
+
+  const monthRegex = "jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?";
+
+  // 1. Relative-day keywords
   if (/\bday after tomorrow\b/.test(lowerText)) {
     foundDueDate = addDaysLocalISO(2);
   } else if (/\btomorrow\b/.test(lowerText)) {
@@ -638,16 +651,37 @@ function parseMessageToTask(text) {
   } else if (/\btoday\b/.test(lowerText)) {
     foundDueDate = addDaysLocalISO(0);
   } else {
-    const dateMatch = text.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
-    if (dateMatch) {
-      const day = dateMatch[1].padStart(2, "0");
-      const month = dateMatch[2].padStart(2, "0");
-      let year = dateMatch[3] ? dateMatch[3] : new Date().getFullYear().toString();
+    // 2. English text dates: e.g. "30th october 2026", "30 Oct", "30th of October"
+    const textDateMatch1 = lowerText.match(new RegExp(`(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?(${monthRegex})(?:\\s*,?\\s*(\\d{2,4}))?`));
+
+    // 3. Reverse text dates: e.g. "October 30th 2026", "Oct 30"
+    const textDateMatch2 = lowerText.match(new RegExp(`(${monthRegex})\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:\\s*,?\\s*(\\d{2,4}))?`));
+
+    // 4. Numeric dates: e.g. "30/10/2026", "30-10-26", "30.10.2026"
+    const numericDateMatch = text.match(/(\d{1,2})[\/\-\.](\d{1,2})(?:[\/\-\.](\d{2,4}))?/);
+
+    if (textDateMatch1) {
+      const day = textDateMatch1[1].padStart(2, "0");
+      const month = monthNames[textDateMatch1[2]];
+      let year = textDateMatch1[3] || new Date().getFullYear().toString();
+      if (year.length === 2) year = "20" + year;
+      foundDueDate = `${year}-${month}-${day}`;
+    } else if (textDateMatch2) {
+      const month = monthNames[textDateMatch2[1]];
+      const day = textDateMatch2[2].padStart(2, "0");
+      let year = textDateMatch2[3] || new Date().getFullYear().toString();
+      if (year.length === 2) year = "20" + year;
+      foundDueDate = `${year}-${month}-${day}`;
+    } else if (numericDateMatch) {
+      const day = numericDateMatch[1].padStart(2, "0");
+      const month = numericDateMatch[2].padStart(2, "0");
+      let year = numericDateMatch[3] || new Date().getFullYear().toString();
       if (year.length === 2) year = "20" + year;
       foundDueDate = `${year}-${month}-${day}`;
     }
   }
 
+  // Fallback only if no date or keyword was detected
   if (!foundDueDate) {
     foundDueDate = addDaysLocalISO(3);
   }
