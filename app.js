@@ -1,17 +1,17 @@
 /* =========================================================
    0. FIREBASE SETUP
    ========================================================= */
-import { initializeApp } from "[https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js](https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js)";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, signOut,
   EmailAuthProvider, reauthenticateWithCredential, deleteUser
-} from "[https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js](https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js)";
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 import {
   getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot,
   query, where, getDocs
-} from "[https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js](https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js)";
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyADL-_-NBH55fb37CLUrllyZmKEsh8Bmno",
@@ -29,6 +29,44 @@ const db = getFirestore(firebaseApp);
 let currentUid = null;
 let unsubStudents = null;
 let unsubTasks = null;
+
+/* =========================================================
+   CUSTOM CONFIRMATION DIALOG (replaces browser confirm)
+   ========================================================= */
+let onConfirmAction = null;
+
+function showConfirmDialog(title, message, btnText, onConfirm) {
+  const modal = document.getElementById("confirm-dialog-modal");
+  if (!modal) return;
+  document.getElementById("confirm-dialog-title").textContent = title;
+  document.getElementById("confirm-dialog-message").textContent = message;
+  const okBtn = document.getElementById("confirm-dialog-ok");
+  okBtn.textContent = btnText;
+  onConfirmAction = onConfirm;
+  modal.hidden = false;
+}
+
+function setupConfirmDialog() {
+  const modal = document.getElementById("confirm-dialog-modal");
+  if (!modal) return;
+  document.getElementById("confirm-dialog-cancel").addEventListener("click", () => {
+    modal.hidden = true;
+    onConfirmAction = null;
+  });
+  document.getElementById("confirm-dialog-ok").addEventListener("click", () => {
+    modal.hidden = true;
+    if (onConfirmAction) {
+      onConfirmAction();
+      onConfirmAction = null;
+    }
+  });
+  modal.addEventListener("click", (e) => {
+    if (e.target.id === "confirm-dialog-modal") {
+      modal.hidden = true;
+      onConfirmAction = null;
+    }
+  });
+}
 
 /* =========================================================
    1. LOGIN SCREEN
@@ -193,7 +231,6 @@ function attachFirestoreListeners() {
     renderStudentSwitcher();
     renderAll();
 
-    // Trigger WhatsApp Share Target handler once student profiles load
     handleIncomingSharedText();
   });
 
@@ -643,7 +680,6 @@ function parseMessageToTask(text) {
 
   const monthRegex = "jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?";
 
-  // 1. Relative-day keywords
   if (/\bday after tomorrow\b/.test(lowerText)) {
     foundDueDate = addDaysLocalISO(2);
   } else if (/\btomorrow\b/.test(lowerText)) {
@@ -651,13 +687,8 @@ function parseMessageToTask(text) {
   } else if (/\btoday\b/.test(lowerText)) {
     foundDueDate = addDaysLocalISO(0);
   } else {
-    // 2. English text dates: e.g. "30th october 2026", "30 Oct", "30th of October"
     const textDateMatch1 = lowerText.match(new RegExp(`(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?(${monthRegex})(?:\\s*,?\\s*(\\d{2,4}))?`));
-
-    // 3. Reverse text dates: e.g. "October 30th 2026", "Oct 30"
     const textDateMatch2 = lowerText.match(new RegExp(`(${monthRegex})\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:\\s*,?\\s*(\\d{2,4}))?`));
-
-    // 4. Numeric dates: e.g. "30/10/2026", "30-10-26", "30.10.2026"
     const numericDateMatch = text.match(/(\d{1,2})[\/\-\.](\d{1,2})(?:[\/\-\.](\d{2,4}))?/);
 
     if (textDateMatch1) {
@@ -681,7 +712,6 @@ function parseMessageToTask(text) {
     }
   }
 
-  // Fallback only if no date or keyword was detected
   if (!foundDueDate) {
     foundDueDate = addDaysLocalISO(3);
   }
@@ -859,44 +889,6 @@ function buildTaskRow(t) {
 /* =========================================================
    12. NATIVE CONFIRM MODAL & TABLE ACTIONS
    ========================================================= */
-let onConfirmAction = null;
-
-function showConfirmDialog(title, message, btnText, onConfirm) {
-  const modal = document.getElementById("confirm-dialog-modal");
-  if (!modal) return;
-  document.getElementById("confirm-dialog-title").textContent = title;
-  document.getElementById("confirm-dialog-message").textContent = message;
-  const okBtn = document.getElementById("confirm-dialog-ok");
-  okBtn.textContent = btnText;
-  onConfirmAction = onConfirm;
-  modal.hidden = false;
-}
-
-function setupConfirmDialog() {
-  const modal = document.getElementById("confirm-dialog-modal");
-  if (!modal) return;
-
-  document.getElementById("confirm-dialog-cancel").addEventListener("click", () => {
-    modal.hidden = true;
-    onConfirmAction = null;
-  });
-
-  document.getElementById("confirm-dialog-ok").addEventListener("click", () => {
-    modal.hidden = true;
-    if (onConfirmAction) {
-      onConfirmAction();
-      onConfirmAction = null;
-    }
-  });
-
-  modal.addEventListener("click", (e) => {
-    if (e.target.id === "confirm-dialog-modal") {
-      modal.hidden = true;
-      onConfirmAction = null;
-    }
-  });
-}
-
 function attachRowActionListeners(containerId) {
   const container = document.getElementById(containerId);
 
